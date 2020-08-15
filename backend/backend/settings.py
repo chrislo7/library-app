@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
     'library'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -124,3 +127,8 @@ STATIC_URL = '/static/'
 FIXTURE_DIRS = (
    '/backend/library/fixtures/',
 )
+
+# Frontend will be served on localhost: 3000
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000'
+]

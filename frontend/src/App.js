@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
-import './App.css';
 import axios from "axios";
+import './styles/App.css';
+
+import LibrarySearch from "./components/LibrarySearch";
+import ViewTabs from "./components/ViewTabs";
+import BookList from "./components/BookList";
+import PageTabs from "./components/PageTabs";
 
 class App extends Component {
     constructor(props) {
@@ -37,7 +42,7 @@ class App extends Component {
 
         if (this.state.viewTab === 'reserved') {
             path += 'reserved=true';
-        } else if (this.state.viewTab === 'unreserved') {
+        } else if (this.state.viewTab === 'unreserve') {
             path += 'reserved=false';
         }
 
@@ -63,7 +68,7 @@ class App extends Component {
 
         if (this.state.viewTab === 'reserved') {
             path += 'reserved=true';
-        } else if (this.state.viewTab === 'unreserved') {
+        } else if (this.state.viewTab === 'unreserve') {
             path += 'reserved=false';
         }
 
@@ -107,7 +112,7 @@ class App extends Component {
 
         if (viewTab === 'reserved') {
             path += 'reserved=true';
-        } else if (viewTab === 'unreserved') {
+        } else if (viewTab === 'unreserve') {
             path += 'reserved=false';
         }
 
@@ -144,85 +149,6 @@ class App extends Component {
         });
     };
 
-    renderSearch = () => {
-        return (
-            <div>
-                <div className="search-bar-container">
-                        <input className="search-bar" type="text"
-                        value={this.state.value} onKeyUp={this.handleChange}/>
-                        {/* <input type="submit" value="Submit" /> */}
-                </div>
-                <div className="searched-count">
-                    {this.state.count} results.
-                </div>
-            </div>
-        );
-    };
-
-    renderTabs = () => {
-        return (
-            <div className="tabs">
-                <button
-                    onClick={() => this.displayReserved('all')}
-                    className={`tab ${this.state.viewTab === 'all' ? "active-tab" : ""}`}
-                >
-                    all
-                </button>
-                <button
-                    onClick={() => this.displayReserved('reserved')}
-                    className={`tab ${this.state.viewTab === 'reserved' ? "active-tab" : ""}`}
-                >
-                    reserved
-                </button>
-                <button
-                    onClick={() => this.displayReserved('unreserved')}
-                    className={`tab ${this.state.viewTab === 'unreserved' ? "active-tab" : ""}`}
-                >
-                    free for reservation
-                </button>
-            </div>
-        );
-    };
-
-    renderBooks = () => {
-        const books = this.state.bookList;
-        return books.map(book => (
-            <li key={book.id} className="book">
-                <div className="text book__title">
-                    {book.title} by {book.author}
-                </div>
-                <div className="text book__author">
-                    By {book.author}
-                </div>
-                <div className="text book__stock-info">
-                    <span className="text stock-info__number">
-                        {book.quantity} in stock.
-                    </span>
-                    <button className="text stock-info__reserve" onClick={() => this.reserveBook(book)}>
-                        { book.reserved ? 'Unreserve' : 'Reserve' }
-                    </button>
-                </div>
-            </li>
-        ));
-    };
-
-    renderPageTabs = () => {
-        return (
-            <div className="page-btn-container">
-                {this.state.previousPage &&
-                    <button className="page-btn" onClick={() => this.changePage('previous')}>
-                        Previous Page
-                    </button>
-                }
-                {this.state.nextPage &&
-                    <button className="page-btn" onClick={() => this.changePage('next')}>
-                        Next Page
-                    </button>
-                }
-            </div>
-        );
-    };
-
     render() {
         return (
             <div className="content">
@@ -230,14 +156,24 @@ class App extends Component {
                 <h2>Search for a book by title, or filter through the list by reservation status.</h2>
                 <div>
                     <div>
-                        {this.renderSearch()}
-                        {this.renderTabs()}
-                        <ul className="list-group">
-                            {this.renderBooks()}
-                        </ul>
-                        <div>
-                            { this.renderPageTabs() }
-                        </div>
+                        <LibrarySearch
+                        handleChange={this.handleChange}
+                        refreshList={this.refreshList}
+                        search={this.search}
+                        count={this.state.count}
+                        />
+                        <ViewTabs
+                        displayReserved={this.displayReserved}
+                        viewTab={this.state.viewTab}
+                        />
+                        <BookList
+                        bookList={this.state.bookList}
+                        />
+                        <PageTabs
+                        nextPage={this.state.nextPage}
+                        previousPage={this.state.previousPage}
+                        changePage={this.changePage}
+                        />
                     </div>
                 </div>
             </div>

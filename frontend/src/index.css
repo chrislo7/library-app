@@ -44,14 +44,18 @@ code {
     /* column-gap: 20%; */
 }
 
-.tab {
+.tab, .page-btn, .reserve-btn {
     font-size: 16px;
-    height: 50px;
-    min-width: 200px;
+    /* height: 50px; */
+    padding: 6px;
     margin: 0 24px;
     background: white;
     border: 0.5px solid grey;
     border-radius: 5px;
+}
+
+.tab, .page-btn {
+    width: 200px;
 }
 
 .active-tab {
@@ -88,13 +92,3 @@ li {
     display: flex;
     justify-content: center;
 }
-
-/* .page-btn {
-    width: 100px;
-    height: 50px;
-    margin: 24px 24px;
-}
-
-.btn-input {
-    width: 100px;
-} */

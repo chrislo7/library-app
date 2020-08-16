@@ -2,63 +2,45 @@ import React, { Component } from 'react';
 import './App.css';
 import axios from "axios";
 
-// hardcoded values
-// const response = {
-//     "count": 10,
-//     "next": "http://localhost:8000/api/books/?page=2",
-//     "previous": null,
-//     "results": [
-//         {
-//             "id": "1",
-//             "title": "Python Crash Course",
-//             "author": "Eric Matthes",
-//             "quantity": 5,
-//             "reserved": false
-//         },
-//         {
-//             "id": "2",
-//             "title": "Head-First Python",
-//             "author": "Paul Barry",
-//             "quantity": 2,
-//             "reserved": false
-//         },
-//         {
-//             "id": "3",
-//             "title": "Invent Your Own Computer Games with Python",
-//             "author": "Al Sweigart",
-//             "quantity": 1,
-//             "reserved": true
-//         }
-//     ]
-// };
-
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            viewReserved: false,
+            viewReserved: 'all',
             bookList: [],
             nextPage: null,
-            previousPage: null
+            previousPage: null,
+            searchQuery: '',
+            count: null
         };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     };
 
     componentDidMount() {
-        this.refreshList();        
+        this.refreshList();
     };
 
-    // handleChange = (e) => {
-    //     this.setState({ input: e.target.value });
-    // };
+    handleChange(event) {
+        this.setState({searchQuery: event.target.value});
+    };
+
+    handleSubmit(event) {
+        this.search(this.state.searchQuery);
+        event.preventDefault();
+    };
 
     refreshList = () => {
         axios
-            .get("http://localhost:8000/api/books/")
+            .get("/api/books/")
             .then((res) => {
-                console.log(res.data);
-                this.setState({ bookList: res.data.results })
-                this.setState({ nextPage: res.data.next })
-                this.setState({ previousPage: res.data.previous })
+                this.setState({ 
+                    bookList: res.data.results,
+                    nextPage: res.data.next,
+                    previousPage: res.data.previous,
+                    count: res.data.count
+                });
             })
             .catch((err) => {
                 console.log(err)
@@ -67,11 +49,14 @@ class App extends Component {
 
     search = (query) => {
         axios
-            .get("http://localhost:8000/api/books/?search=" + query)
+            .get("/api/books/?title=" + query)
             .then((res) => {
-                this.setState({ bookList: res.data.results })
-                this.setState({ nextPage: res.data.next })
-                this.setState({ previousPage: res.data.previous })
+                this.setState({ 
+                    bookList: res.data.results,
+                    nextPage: res.data.next,
+                    previousPage: res.data.previous,
+                    count: res.data.count
+                });
             })
             .catch((err) => {
                 console.log(err)
@@ -79,50 +64,83 @@ class App extends Component {
     };
 
     changePage = (page) => {
-        // page === 'next'
-        // nextPage is the url
-        // 
+        var url;
+        page === 'next' ? url = this.state.nextPage : url = this.state.previousPage;
 
-        if (page === 'next') {
-            axios
-                .get(this.state.nextPage)
-                .then((res) => {
-                    this.setState({ bookList: res.data.results })
-                    this.setState({ nextPage: res.data.next })
-                    this.setState({ previousPage: res.data.previous })
+        axios
+            .get(url)
+            .then((res) => {
+                this.setState({ 
+                    bookList: res.data.results,
+                    nextPage: res.data.next,
+                    previousPage: res.data.previous
                 })
-                .catch((err) => {
-                    console.log(err)
-                });
-        } else {
-            axios
-                .get(this.state.previousPage)
-                .then((res) => {
-                    this.setState({ bookList: res.data.results })
-                    this.setState({ nextPage: res.data.next })
-                    this.setState({ previousPage: res.data.previous })
-                })
-                .catch((err) => {
-                    console.log(err)
-                });        
-        }
+            })
+            .catch((err) => {
+                console.log(err)
+            });
     };
 
     displayReserved = (status) => {
-        if (status) {
-            return this.setState({ viewReserved: true });
-        } else {
-            return this.setState({ viewReserved: false });
+        var path = '/api/books/';
+
+        if (status === 'reserved') {
+            path += '?reserved=true';
+        } else if (status === 'unreserved') {
+            path += '?reserved=false';
         }
+
+        axios
+        .get(path)
+        .then((res) => {
+            this.setState({ 
+                viewReserved: status,
+                bookList: res.data.results,
+                count: res.data.count,
+                nextPage: res.data.next,
+                previousPage: res.data.previous
+            })
+            console.log(this.state);
+        })
+        .catch((err) => {
+            console.log(err)
+        });
+
+        // this.refreshList();
+    };
+
+    reserveBook = (book) => {
+        axios
+        .put("http://localhost:8000/api/books/" + book.id + '/', {
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            quantity: book.quantity,
+            reserved: !book.reserved
+        })
+        .then((res) => {
+            this.refreshList();
+        })
+        .catch((err) => {
+            console.log(err)
+        });
     };
 
     renderSearch = () => {
         return (
-            <div className="search-bar-container">
-                <input className="search-bar" type="text"/>
-                <button className="search-btn">
-                    Search
-                </button>
+            <div>
+                <div className="search-bar-container">
+                    <form onSubmit={ this.handleSubmit }>
+                        <input className="search-bar" type="text"
+                        value={this.state.value} onChange={this.handleChange}/>
+                        <input type="submit" value="Submit" />
+                    </form>
+                </div>
+                {this.state.count &&
+                    <div className="searched-count">
+                        {this.state.count} results.
+                    </div>
+                }
             </div>
         );
     };
@@ -131,14 +149,20 @@ class App extends Component {
         return (
             <div className="tabs">
                 <button
-                    onClick={() => this.displayReserved(true)}
-                    className={`tab ${this.state.viewReserved ? "active" : ""}`}
+                    onClick={() => this.displayReserved('all')}
+                    className={`tab ${this.state.viewReserved === 'all' ? "active-tab" : ""}`}
+                >
+                    all
+                </button>
+                <button
+                    onClick={() => this.displayReserved('reserved')}
+                    className={`tab ${this.state.viewReserved === 'reserved' ? "active-tab" : ""}`}
                 >
                     reserved
                 </button>
                 <button
-                    onClick={() => this.displayReserved(false)}
-                    className={`tab ${!this.state.viewReserved ? "active" : ""}`}
+                    onClick={() => this.displayReserved('unreserved')}
+                    className={`tab ${this.state.viewReserved === 'unreserved' ? "active-tab" : ""}`}
                 >
                     free for reservation
                 </button>
@@ -147,15 +171,9 @@ class App extends Component {
     };
 
     renderBooks = () => {
-        const { viewReserved } = this.state;
-        const books = this.state.bookList.filter(
-            book => book.reserved == viewReserved
-        );
+        const books = this.state.bookList;
         return books.map(book => (
-            <li
-                key={book.id}
-                className={`book ${ this.state.viewReserved ? "reserved-book" : ""}`}
-            >
+            <li key={book.id} className="book">
                 <div className="text book__title">
                     {book.title} by {book.author}
                 </div>
@@ -166,7 +184,9 @@ class App extends Component {
                     <span className="text stock-info__number">
                         {book.quantity} in stock.
                     </span>
-                    <button className="text stock-info__reserve"> Reserve Now </button>
+                    <button className="text stock-info__reserve" onClick={() => this.reserveBook(book)}>
+                        { book.reserved ? 'Unreserve' : 'Reserve' }
+                    </button>
                 </div>
             </li>
         ));
@@ -192,7 +212,8 @@ class App extends Component {
     render() {
         return (
             <div className="content">
-                <h1>Library app</h1>
+                <h1>Library App</h1>
+                <h2>Search for a book by title, or filter through the list by reservation status.</h2>
                 <div>
                     <div>
                         {this.renderSearch()}

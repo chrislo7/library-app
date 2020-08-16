@@ -6,7 +6,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            viewReserved: 'all',
+            viewTab: 'all',
             bookList: [],
             nextPage: null,
             previousPage: null,
@@ -15,25 +15,37 @@ class App extends Component {
         };
 
         this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
     };
 
     componentDidMount() {
         this.refreshList();
     };
 
-    handleChange(event) {
+    handleChange = (event) => {
+        console.log(event.target.value);
         this.setState({searchQuery: event.target.value});
-    };
-
-    handleSubmit(event) {
-        this.search(this.state.searchQuery);
-        event.preventDefault();
+        this.search(event.target.value);
     };
 
     refreshList = () => {
+        var path = '/api/books';
+
+        if (this.state.searchQuery || this.state.viewTab !== 'all') {
+            path += '?';
+        }
+
+        path += this.state.searchQuery ? 'title=' + this.state.searchQuery + '&' : '';
+
+        if (this.state.viewTab === 'reserved') {
+            path += 'reserved=true';
+        } else if (this.state.viewTab === 'unreserved') {
+            path += 'reserved=false';
+        }
+
+        console.log(path);
+
         axios
-            .get("/api/books/")
+            .get(path)
             .then((res) => {
                 this.setState({ 
                     bookList: res.data.results,
@@ -48,8 +60,20 @@ class App extends Component {
     };
 
     search = (query) => {
+        var path = '/api/books?';
+
+        path += query ? 'title=' + query + '&' : '';
+
+        if (this.state.viewTab === 'reserved') {
+            path += 'reserved=true';
+        } else if (this.state.viewTab === 'unreserved') {
+            path += 'reserved=false';
+        }
+
+        console.log(path);
+
         axios
-            .get("/api/books/?title=" + query)
+            .get(path)
             .then((res) => {
                 this.setState({ 
                     bookList: res.data.results,
@@ -81,32 +105,33 @@ class App extends Component {
             });
     };
 
-    displayReserved = (status) => {
-        var path = '/api/books/';
+    displayReserved = (viewTab) => {
+        var path = '/api/books?';
 
-        if (status === 'reserved') {
-            path += '?reserved=true';
-        } else if (status === 'unreserved') {
-            path += '?reserved=false';
+        path += this.state.searchQuery ? 'title=' + this.state.searchQuery + '&' : '';
+
+        if (viewTab === 'reserved') {
+            path += 'reserved=true';
+        } else if (viewTab === 'unreserved') {
+            path += 'reserved=false';
         }
+
+        console.log(path);
 
         axios
         .get(path)
         .then((res) => {
             this.setState({ 
-                viewReserved: status,
+                viewTab: viewTab,
                 bookList: res.data.results,
                 count: res.data.count,
                 nextPage: res.data.next,
                 previousPage: res.data.previous
             })
-            console.log(this.state);
         })
         .catch((err) => {
             console.log(err)
         });
-
-        // this.refreshList();
     };
 
     reserveBook = (book) => {
@@ -130,17 +155,13 @@ class App extends Component {
         return (
             <div>
                 <div className="search-bar-container">
-                    <form onSubmit={ this.handleSubmit }>
                         <input className="search-bar" type="text"
-                        value={this.state.value} onChange={this.handleChange}/>
-                        <input type="submit" value="Submit" />
-                    </form>
+                        value={this.state.value} onKeyUp={this.handleChange}/>
+                        {/* <input type="submit" value="Submit" /> */}
                 </div>
-                {this.state.count &&
-                    <div className="searched-count">
-                        {this.state.count} results.
-                    </div>
-                }
+                <div className="searched-count">
+                    {this.state.count} results.
+                </div>
             </div>
         );
     };
@@ -150,19 +171,19 @@ class App extends Component {
             <div className="tabs">
                 <button
                     onClick={() => this.displayReserved('all')}
-                    className={`tab ${this.state.viewReserved === 'all' ? "active-tab" : ""}`}
+                    className={`tab ${this.state.viewTab === 'all' ? "active-tab" : ""}`}
                 >
                     all
                 </button>
                 <button
                     onClick={() => this.displayReserved('reserved')}
-                    className={`tab ${this.state.viewReserved === 'reserved' ? "active-tab" : ""}`}
+                    className={`tab ${this.state.viewTab === 'reserved' ? "active-tab" : ""}`}
                 >
                     reserved
                 </button>
                 <button
                     onClick={() => this.displayReserved('unreserved')}
-                    className={`tab ${this.state.viewReserved === 'unreserved' ? "active-tab" : ""}`}
+                    className={`tab ${this.state.viewTab === 'unreserved' ? "active-tab" : ""}`}
                 >
                     free for reservation
                 </button>

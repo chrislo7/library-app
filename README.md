@@ -30,6 +30,7 @@ Backend Setup:
 8. You can verify backend server is running by logging into: `localhost:8000/admin` with your superuser account.
 
 Frontend Setup
+In a seperate terminal tab, run the following commands
 1. `cd frontend`
 2. Install required modules: `npm install`
 3. Start frontend app: `npm start`

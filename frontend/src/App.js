@@ -147,6 +147,7 @@ class App extends Component {
             reserved: !book.reserved
         })
         .then((res) => {
+            var currentPage = this.state.currentPage;
             var viewTab = this.state.viewTab;
             var count = this.state.count;
 
@@ -158,9 +159,9 @@ class App extends Component {
                 count--;
             }
 
-            if (count % 3 === 0) {
+            if (count % 3 === 0 && count != 0) {
                 this.setState(prevState => {
-                    return { currentPage: prevState.currentPage-- }
+                    return { currentPage: currentPage > 1 ? prevState.currentPage-- : 1 }
                 });
             }    
 

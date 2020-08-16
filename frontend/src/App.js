@@ -22,7 +22,6 @@ class App extends Component {
     };
 
     handleChange = (event) => {
-        console.log(event.target.value);
         this.setState({searchQuery: event.target.value});
         this.search(event.target.value);
     };
@@ -41,8 +40,6 @@ class App extends Component {
         } else if (this.state.viewTab === 'unreserved') {
             path += 'reserved=false';
         }
-
-        console.log(path);
 
         axios
             .get(path)
@@ -69,8 +66,6 @@ class App extends Component {
         } else if (this.state.viewTab === 'unreserved') {
             path += 'reserved=false';
         }
-
-        console.log(path);
 
         axios
             .get(path)
@@ -115,8 +110,6 @@ class App extends Component {
         } else if (viewTab === 'unreserved') {
             path += 'reserved=false';
         }
-
-        console.log(path);
 
         axios
         .get(path)

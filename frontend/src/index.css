@@ -37,6 +37,11 @@ code {
     margin: 12px 0;
 }
 
+button:hover {
+    background-color: #008CBA;
+    color: white;
+}
+
 .tabs {
     display: flex;
     margin: 24px 0;
@@ -57,6 +62,10 @@ code {
 
 .tab, .page-btn {
     width: 200px;
+}
+
+.hidden-btn {
+    visibility: hidden;
 }
 
 .active-tab {

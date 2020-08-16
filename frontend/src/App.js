@@ -13,6 +13,7 @@ class App extends Component {
         this.state = {
             viewTab: 'all',
             bookList: [],
+            currentPage: 1,
             nextPage: null,
             previousPage: null,
             searchQuery: '',
@@ -31,19 +32,19 @@ class App extends Component {
         this.librarySearch(event.target.value);
     };
 
-    refreshList = () => {
-        var path = '/api/books';
+    refreshList = (currentPage) => {
+        var path = 'http://localhost:8000/api/books?';
 
-        if (this.state.searchQuery || this.state.viewTab !== 'all') {
-            path += '?';
+        if (currentPage) {
+            path += ('page=' + currentPage);
         }
 
-        path += this.state.searchQuery ? 'title=' + this.state.searchQuery + '&' : '';
+        path += this.state.searchQuery ? '&title=' + this.state.searchQuery : "";
 
         if (this.state.viewTab === 'reserved') {
-            path += 'reserved=true';
+            path += '&reserved=true';
         } else if (this.state.viewTab === 'unreserve') {
-            path += 'reserved=false';
+            path += '&reserved=false';
         }
 
         axios
@@ -94,10 +95,13 @@ class App extends Component {
         axios
             .get(url)
             .then((res) => {
-                this.setState({ 
-                    bookList: res.data.results,
-                    nextPage: res.data.next,
-                    previousPage: res.data.previous
+                this.setState(prevState => {
+                    return {
+                        bookList: res.data.results,
+                        currentPage: page === 'next' ? prevState.currentPage++ : prevState.currentPage--,
+                        nextPage: res.data.next,
+                        previousPage: res.data.previous
+                    } 
                 })
             })
             .catch((err) => {
@@ -105,7 +109,7 @@ class App extends Component {
             });
     };
 
-    displayReserved = (viewTab) => {
+    switchTabs = (viewTab) => {
         var path = '/api/books?';
 
         path += this.state.searchQuery ? 'title=' + this.state.searchQuery + '&' : '';
@@ -123,6 +127,7 @@ class App extends Component {
                 viewTab: viewTab,
                 bookList: res.data.results,
                 count: res.data.count,
+                currentPage: 1, // default to page 1 when switching tabs
                 nextPage: res.data.next,
                 previousPage: res.data.previous
             })
@@ -142,7 +147,24 @@ class App extends Component {
             reserved: !book.reserved
         })
         .then((res) => {
-            this.refreshList();
+            var viewTab = this.state.viewTab;
+            var count = this.state.count;
+
+            // each page only has 3 books
+            // e.g. if on the reserved tab, page 2 only has 1 book, unreserving it should send user back to page 1
+            // e.g. if on the unreserved tab, page 2 only has 1 book, reserving it should send user back to page 1
+
+            if (viewTab !== 'all') {
+                count--;
+            }
+
+            if (count % 3 === 0) {
+                this.setState(prevState => {
+                    return { currentPage: prevState.currentPage-- }
+                });
+            }    
+
+            this.refreshList(this.state.currentPage);
         })
         .catch((err) => {
             console.log(err)
@@ -161,7 +183,7 @@ class App extends Component {
                         count={this.state.count}
                         />
                         <ViewTabs
-                        displayReserved={this.displayReserved}
+                        switchTabs={this.switchTabs}
                         viewTab={this.state.viewTab}
                         />
                         <BookList
@@ -172,6 +194,7 @@ class App extends Component {
                         nextPage={this.state.nextPage}
                         previousPage={this.state.previousPage}
                         changePage={this.changePage}
+                        currentPage={this.state.currentPage}
                         />
                     </div>
                 </div>

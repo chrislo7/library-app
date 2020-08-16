@@ -25,15 +25,16 @@ code {
 }
 
 .search-bar {
-    width: 300px;
+    font-size: 20px;
+    text-align: center;
+    min-width: 300px;
+    padding: 6px;
+    border: 1px solid grey;
+    border-radius: 5px;
 }
 
 .searched-count {
     margin: 12px 0;
-}
-
-.search-button {
-    width: 300px;
 }
 
 .tabs {

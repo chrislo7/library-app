@@ -1,11 +1,11 @@
 import React from 'react';
 import '../styles/App.css';
 
-const LibrarySearch = ({ handleChange, refreshList, search, count }) => {
+const LibrarySearch = ({ handleChange, count }) => {
     return (
         <div>
             <div className="search-bar-container">
-                    <input className="search-bar" type="text"
+                    <input className="search-bar" type="text" placeholder="Search By Title"
                     onKeyUp={handleChange}/>
             </div>
             <div className="searched-count">

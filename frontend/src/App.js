@@ -28,7 +28,7 @@ class App extends Component {
 
     handleChange = (event) => {
         this.setState({searchQuery: event.target.value});
-        this.search(event.target.value);
+        this.librarySearch(event.target.value);
     };
 
     refreshList = () => {
@@ -61,7 +61,7 @@ class App extends Component {
             })
     };
 
-    search = (query) => {
+    librarySearch = (query) => {
         var path = '/api/books?';
 
         path += query ? 'title=' + query + '&' : '';
@@ -158,8 +158,6 @@ class App extends Component {
                     <div>
                         <LibrarySearch
                         handleChange={this.handleChange}
-                        refreshList={this.refreshList}
-                        search={this.search}
                         count={this.state.count}
                         />
                         <ViewTabs
@@ -168,6 +166,7 @@ class App extends Component {
                         />
                         <BookList
                         bookList={this.state.bookList}
+                        reserveBook={this.reserveBook}
                         />
                         <PageTabs
                         nextPage={this.state.nextPage}

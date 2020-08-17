@@ -22,7 +22,7 @@ Initial Setup:
 Backend Setup:
 1. `cd backend`
 2. Install Django: `pip3 install django`
-3. Install required modules: `pip3 install djangorestframework django-cors-headers django-filters`
+3. Install required modules: `pip3 install djangorestframework django-cors-headers django-filter`
 4. Create superuser account to access the admin interface: `python3 manage.py createsuperuser`
 5. Run migration: `python3 manage.py migrate`
 6. Run fixture: `python3 manage.py loaddata library/fixtures/library-data-source.json`
